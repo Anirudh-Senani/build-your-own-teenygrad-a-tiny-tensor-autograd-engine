@@ -96,6 +96,8 @@ def lazybuffer_binary_e(self, op, other):
 
     return LazyBuffer(out)
 
+LazyBuffer.lazybuffer_binary_e = lazybuffer_binary_e
+
 # Step 9 - lazybuffer_r
 def r(self, op, axis):
     # TODO: reduce the underlying array along axis (SUM or MAX), keeping reduced dims as size 1
