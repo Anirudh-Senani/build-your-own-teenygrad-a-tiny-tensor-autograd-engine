@@ -390,8 +390,20 @@ def expand_function_backward(ctx, grad_output):
     axis = tuple(i for i in range(len(ctx.input_shape)) if ctx.input_shape[i]==1 and grad_output.shape[i]!=1)
     return grad_output.r(ReduceOps.SUM, axis)
 
-# Step 33 - permute_function_forward_backward (not yet solved)
-# TODO: implement
+# Step 33 - permute_function_forward_backward
+def permute_function_forward_backward():
+    # TODO: return (forward, backward); forward reorders axes, backward inverts the order
+    def forward(self, x, order):
+        self.order = order
+        return x.permute(order)
+
+
+    def backward(self, grad_output):
+        order = argsort(self.order)
+        return grad_output.permute(order)
+
+    
+    return (forward, backward)
 
 # Step 34 - Tensor (not yet solved)
 # TODO: implement
