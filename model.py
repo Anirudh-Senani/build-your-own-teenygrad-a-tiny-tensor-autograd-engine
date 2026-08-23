@@ -350,8 +350,20 @@ class Max(Function):
         self.ret = x.r(ReduceOps.MAX, axis)
         return self.ret
 
-# Step 29 - max_function_backward (not yet solved)
-# TODO: implement
+# Step 29 - max_function_backward
+def backward(self, grad_output):
+    # TODO: route grad_output back to the input elements that were the maximum
+    ones = const(1.0, self.x.shape)
+    mask = self.x.lazybuffer_binary_e(BinaryOps.CMPLT, self.ret)
+    mask = ones.lazybuffer_binary_e(BinaryOps.SUB, mask)
+    counts = mask.r(ReduceOps.SUM, self.axis)
+    counts = counts.expand(self.x.shape)
+    mask = mask.lazybuffer_binary_e(BinaryOps.DIV, counts)
+    mask = grad_output.expand(self.x.shape).lazybuffer_binary_e(BinaryOps.MUL, mask)
+    return mask
+
+
+Max.backward = backward
 
 # Step 30 - Reshape (not yet solved)
 # TODO: implement
