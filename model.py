@@ -20,8 +20,17 @@ def argsort(values):
     # TODO: Return the indices that would sort values in ascending order.
     return sorted(range(len(values)), key=lambda x: values[x])
 
-# Step 3 - make_op_enums (not yet solved)
-# TODO: implement
+# Step 3 - make_op_enums
+from enum import Enum
+
+def make_op_enums():
+    # TODO: create four enum classes naming every supported operation kind
+    UnaryOps = Enum('UnaryOps', ['NEG', 'RELU', 'LOG', 'EXP', 'SQRT', 'SIGMOID'])
+    BinaryOps = Enum('BinaryOps', ['ADD', 'SUB', 'MUL', 'DIV', 'CMPLT', 'MAX'])
+    ReduceOps = Enum('ReduceOps', ['SUM', 'MAX'])
+    MovementOps = Enum('MovementOps', ['RESHAPE', 'EXPAND', 'PERMUTE'])
+
+    return UnaryOps, BinaryOps, ReduceOps, MovementOps
 
 # Step 4 - LazyBuffer (not yet solved)
 # TODO: implement
