@@ -377,8 +377,12 @@ class Reshape(Function):
         # TODO: reshape the gradient back to the cached input shape
         return grad_output.reshape(self.input_shape)
 
-# Step 31 - expand_function_forward (not yet solved)
-# TODO: implement
+# Step 31 - expand_function_forward
+def expand_function_forward(ctx, x, shape):
+    # TODO: cache x.shape on ctx, then broadcast x to the target shape
+    ctx.input_shape = x.shape
+    shape = tuple(int(d) for d in shape)
+    return x.expand(shape)
 
 # Step 32 - expand_function_backward (not yet solved)
 # TODO: implement
