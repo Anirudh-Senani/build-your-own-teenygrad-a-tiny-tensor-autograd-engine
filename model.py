@@ -347,7 +347,8 @@ class Max(Function):
         # TODO: reduce x with the MAX reduce op along axis and cache for backward
         self.x = x
         self.axis = axis
-        return x.r(ReduceOps.MAX, axis)
+        self.ret = x.r(ReduceOps.MAX, axis)
+        return self.ret
 
 # Step 29 - max_function_backward (not yet solved)
 # TODO: implement
