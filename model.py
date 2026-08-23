@@ -137,8 +137,16 @@ def permute(self, order):
 
 LazyBuffer.permute = permute
 
-# Step 13 - Function (not yet solved)
-# TODO: implement
+# Step 13 - Function
+class Function:
+    def __init__(self, *tensors):
+        # TODO: record needs_input_grad, requires_grad, and parents for backprop
+        self.needs_input_grad = [t.requires_grad for t in tensors]
+        is_none = None in self.needs_input_grad
+        self.requires_grad = True if any(self.needs_input_grad) and not is_none else None if is_none else False
+
+        if self.requires_grad:
+            self.parents = tensors
 
 # Step 14 - function_forward_backward_stubs (not yet solved)
 # TODO: implement
