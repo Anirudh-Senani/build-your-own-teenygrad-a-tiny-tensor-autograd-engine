@@ -135,6 +135,8 @@ def permute(self, order):
     # TODO: return a new LazyBuffer with axes reordered according to order
     return LazyBuffer(self._np.transpose(order))
 
+LazyBuffer.permute = permute
+
 # Step 13 - Function (not yet solved)
 # TODO: implement
 
