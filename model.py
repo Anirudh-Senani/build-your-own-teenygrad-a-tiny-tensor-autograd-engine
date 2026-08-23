@@ -88,7 +88,7 @@ def lazybuffer_binary_e(self, op, other):
         case 'DIV':
             out = self._np / other._np
         case 'CMPLT':
-            out = (self._np < other._np).astype(a.dtype)
+            out = (self._np < other._np).astype(self.dtype)
         case 'MAX':
             out = np.maximum(self._np, other._np)
         case _:
@@ -192,8 +192,21 @@ class Neg(Function):
         # TODO: return the negated incoming gradient
         return LazyBuffer(-grad_output._np)
 
-# Step 17 - Relu (not yet solved)
-# TODO: implement
+# Step 17 - Relu
+UnaryOps, BinaryOps, ReduceOps, MovementOps = make_op_enums()
+
+class Relu(Function):
+    def forward(self, x):
+        # TODO: apply the rectified linear unit to lazy buffer x and cache the result
+        self.ret = x.e(UnaryOps.RELU)
+        return self.ret
+
+
+    def backward(self, grad_output):
+        # TODO: route the upstream gradient only through positions that were positive
+        grad = const(0.0, grad_output.shape)
+        mask = self.ret.lazybuffer_binary_e(BinaryOps.CMPLT, grad)
+        return grad_output.lazybuffer_binary_e(BinaryOps.MUL, mask)
 
 # Step 18 - Log (not yet solved)
 # TODO: implement
