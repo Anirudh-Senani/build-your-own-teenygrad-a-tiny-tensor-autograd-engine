@@ -109,8 +109,11 @@ def r(self, op, axis):
 
     return LazyBuffer(out)
 
-# Step 10 - lazybuffer_reshape (not yet solved)
-# TODO: implement
+# Step 10 - lazybuffer_reshape
+def reshape(self, new_shape):
+    # TODO: return a new LazyBuffer with the array reshaped to new_shape
+    out = self._np.reshape(new_shape)
+    return LazyBuffer(out)
 
 # Step 11 - lazybuffer_expand (not yet solved)
 # TODO: implement
