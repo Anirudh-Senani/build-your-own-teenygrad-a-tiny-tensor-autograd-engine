@@ -232,8 +232,18 @@ class Exp(Function):
         # TODO: turn the upstream gradient into the gradient w.r.t. the input
         return grad_output.lazybuffer_binary_e(BinaryOps.MUL, self.ret)
 
-# Step 20 - Sqrt (not yet solved)
-# TODO: implement
+# Step 20 - Sqrt
+class Sqrt(Function):
+    def forward(self, x):
+        # TODO: compute the elementwise square root and cache it for backward
+        self.ret = x.e(UnaryOps.SQRT)
+        return self.ret
+
+
+    def backward(self, grad_output):
+        factor = const(0.5, grad_output.shape)
+        grad = factor.lazybuffer_binary_e(BinaryOps.DIV, self.ret)
+        return grad_output.lazybuffer_binary_e(BinaryOps.MUL, grad)
 
 # Step 21 - Sigmoid (not yet solved)
 # TODO: implement
