@@ -298,8 +298,34 @@ class Mul(Function):
         return (grad_output.lazybuffer_binary_e(BinaryOps.MUL, self.y) if self.needs_input_grad[0] else None,
         grad_output.lazybuffer_binary_e(BinaryOps.MUL, self.x) if self.needs_input_grad[1] else None)
 
-# Step 25 - Div (not yet solved)
-# TODO: implement
+# Step 25 - Div
+class Div(Function):
+    def forward(self, x, y):
+        # TODO: divide LazyBuffer x by y and cache inputs for backward
+        self.x = x
+        self.y = y
+        return x.lazybuffer_binary_e(BinaryOps.DIV, y)
+
+
+    def backward(self, grad_output):
+        # TODO: return gradients w.r.t. x and y via the quotient rule
+        if self.needs_input_grad[0]:
+            ones = const(1.0, grad_output.shape)
+            grad_x = ones.lazybuffer_binary_e(BinaryOps.DIV, self.y)
+            grad_x = grad_x.lazybuffer_binary_e(BinaryOps.MUL, grad_output)
+        else:
+            grad_x = None
+
+        if self.needs_input_grad[1]:
+            ones = const(-1.0, grad_output.shape)
+            grad_y = self.y.lazybuffer_binary_e(BinaryOps.MUL, self.y)
+            grad_y = self.x.lazybuffer_binary_e(BinaryOps.DIV, grad_y)
+            grad_y = grad_y.lazybuffer_binary_e(BinaryOps.MUL, ones)
+            grad_y = grad_y.lazybuffer_binary_e(BinaryOps.MUL, grad_output)
+        else:
+            grad_y = None
+
+        return (grad_x, grad_y)
 
 # Step 26 - sum_function_forward (not yet solved)
 # TODO: implement
