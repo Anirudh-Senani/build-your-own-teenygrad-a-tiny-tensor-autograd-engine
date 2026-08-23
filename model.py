@@ -180,8 +180,17 @@ for _obj in list(globals().values()):
             if _k.__name__ == 'Function':
                 _k.apply = apply
 
-# Step 16 - Neg (not yet solved)
-# TODO: implement
+# Step 16 - Neg
+import numpy as np
+
+class Neg(Function):
+    def forward(self, x):
+        # TODO: return a LazyBuffer holding the elementwise negation of x
+        return LazyBuffer(-x._np)
+
+    def backward(self, grad_output):
+        # TODO: return the negated incoming gradient
+        return LazyBuffer(-grad_output._np)
 
 # Step 17 - Relu (not yet solved)
 # TODO: implement
