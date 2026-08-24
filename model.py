@@ -502,19 +502,21 @@ def build_topological_order(tensor):
 def tensor_backward(tensor):
     # TODO: seed root grad with ones, run each backward in reverse topo order
     tensor.grad = Tensor(const(1.0, tensor.shape))
-    grad_output = tensor.grad
+    grad_output = const(1.0, tensor.shape)
 
     for node in reversed(build_topological_order(tensor)):
         if node._ctx is None:
             continue
         grads = node._ctx.backward(grad_output)
+        if isinstance(grads, LazyBuffer):
+            grads = [grads]
         for parent, grad in zip(node._ctx.parents, grads):
             if grad is None or not parent.requires_grad:
                 continue
             if parent.grad is None:
                 parent.grad = Tensor(grad)
             else:
-                parent.grad = tensor_from_data(parent.grad._np + grad._np)
+                parent.grad = tensor_from_data(parent.grad.lazydata._np + grad._np)
 
 # Step 40 - bind_unary_tensor_methods (not yet solved)
 # TODO: implement
