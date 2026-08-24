@@ -587,6 +587,8 @@ def bind_binary_tensor_methods():
     Tensor.div = div
     Tensor.__truediv__ = div
 
+bind_binary_tensor_methods()
+
 # Step 43 - bind_movement_tensor_methods
 def bind_movement_tensor_methods():
     def _get_lazydata(t):
