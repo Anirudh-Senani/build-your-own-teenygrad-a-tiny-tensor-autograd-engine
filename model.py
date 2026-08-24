@@ -621,8 +621,43 @@ def bind_movement_tensor_methods():
         'permute': permute
     }
 
-# Step 44 - bind_reduce_tensor_methods (not yet solved)
-# TODO: implement
+# Step 44 - bind_reduce_tensor_methods
+def bind_reduce_tensor_methods():
+    # TODO: attach sum and max reduction methods to the Tensor class
+    def _axes(ndim, axis):
+        if axis is None:
+            return tuple(range(ndim))
+        elif isinstance(axis, int):
+            return axis % ndim
+        elif isinstance(axis, tuple):
+            return tuple(a % ndim for a in axis)
+        raise ValueError
+
+    def _np(self):
+        for attr in ('lazydata', 'data', 'buffer'):
+            if hasattr(self, attr):
+                val = getattr(self, attr)
+                return val._np if isinstance(val._np, np.ndarray) else np.asarray(val)
+        if hasattr(self, '_np'):
+            return self._np
+        raise AttributeError("no numpy array found")
+
+    if not (hasattr(Tensor, "numpy") and callable(getattr(Tensor, "numpy"))):
+        Tensor.numpy = _np
+
+    def sum(self, axis=None, keepdim=False):
+        arr = _np(self)
+        axes = _axes(len(arr.shape), axis)
+        result = arr.sum(axis=axes, keepdims=keepdim)
+        return tensor_from_data(result)
+    Tensor.sum = sum
+
+    def max(self, axis=None, keepdim=False):
+        arr = _np(self)
+        axes = _axes(len(arr.shape), axis)
+        result = arr.max(axis=axes, keepdims=keepdim)
+        return tensor_from_data(result)
+    Tensor.max = max
 
 # Step 45 - tensor_mean (not yet solved)
 # TODO: implement
