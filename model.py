@@ -793,8 +793,20 @@ class MLP:
         # TODO: return combined parameter list of both layers
         return self.ff1.parameters() + self.ff2.parameters()
 
-# Step 53 - sgd_step (not yet solved)
-# TODO: implement
+# Step 53 - sgd_step
+def sgd_step(parameters, learning_rate):
+    # TODO: Update each parameter in place by subtracting lr times its gradient.
+    def _get_np(t):
+        if isinstance(t, LazyBuffer):
+            return t._np
+        else:
+            return np.array(t, dtype=np.float32)
+
+    for p in parameters:
+        if p.grad is None:
+            continue
+
+        p.data = LazyBuffer(_get_np(p.data) - learning_rate * _get_np(p.grad.data))
 
 # Step 54 - zero_grad (not yet solved)
 # TODO: implement
