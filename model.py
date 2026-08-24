@@ -754,8 +754,21 @@ def sparse_categorical_cross_entropy(logits, labels):
     loss = (-logprobs[np.arange(labels.shape[0]), labels]).mean()
     return tensor_from_data(float(loss))
 
-# Step 51 - Linear (not yet solved)
-# TODO: implement
+# Step 51 - Linear
+class Linear:
+    # TODO: build randn weight [in,out] and bias [out], call computes x @ W + b
+    def __init__(self, in_features, out_features, seed=None):
+        w = np.random.RandomState(seed).randn(in_features, out_features)
+        b = np.random.RandomState(seed).randn(out_features)
+        self.weight = Tensor(w, requires_grad=True)
+        self.bias = Tensor(b, requires_grad=True)
+
+    def __call__(self, x):
+        y = tensor_matmul_2d(x, self.weight).data._np + np.asarray(self.bias.data._np, dtype=np.float32)
+        return Tensor(y, requires_grad=True)
+
+    def parameters(self):
+        return [self.weight, self.bias]
 
 # Step 52 - MLP (not yet solved)
 # TODO: implement
