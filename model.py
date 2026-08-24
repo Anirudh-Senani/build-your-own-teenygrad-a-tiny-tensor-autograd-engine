@@ -745,8 +745,14 @@ def tensor_log_softmax(x, axis=-1):
 
     return Result(shifted - log_sum_exp)
 
-# Step 50 - sparse_categorical_cross_entropy (not yet solved)
-# TODO: implement
+# Step 50 - sparse_categorical_cross_entropy
+def sparse_categorical_cross_entropy(logits, labels):
+    # TODO: mean negative log-probability of the correct class for each sample
+    logprobs = tensor_log_softmax(logits).numpy().astype(np.float64)
+    labels = np.asarray(labels).astype(int).reshape(-1)
+
+    loss = (-logprobs[np.arange(labels.shape[0]), labels]).mean()
+    return tensor_from_data(float(loss))
 
 # Step 51 - Linear (not yet solved)
 # TODO: implement
