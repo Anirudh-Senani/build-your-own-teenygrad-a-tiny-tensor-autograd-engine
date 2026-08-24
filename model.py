@@ -718,8 +718,30 @@ def tensor_softmax(x, axis=-1):
 
     return tensor_from_data(result)
 
-# Step 49 - tensor_log_softmax (not yet solved)
-# TODO: implement
+# Step 49 - tensor_log_softmax
+def tensor_log_softmax(x, axis=-1):
+    # TODO: compute the log of the softmax of x along axis, numerically stable
+    def _to_np(self):
+        for attr in ('lazydata', 'data', 'buffer'):
+            if hasattr(self, attr):
+                val = getattr(self, attr)
+                return val._np if isinstance(val._np, np.ndarray) else np.array(val, dtype=np.float64)
+        if hasattr(self, '_np'):
+            return self._np
+        raise AttributeError("no numpy array found")
+
+    arr = np.array(_to_np(x), dtype=np.float64)
+    shifted = arr - arr.max(axis=axis, keepdims=True)
+    log_sum_exp = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
+
+    class Result:
+        def __init__(self, array):
+            self._array = array
+
+        def numpy(self):
+            return self._array
+
+    return Result(shifted - log_sum_exp)
 
 # Step 50 - sparse_categorical_cross_entropy (not yet solved)
 # TODO: implement
