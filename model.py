@@ -518,8 +518,24 @@ def tensor_backward(tensor):
             else:
                 parent.grad = tensor_from_data(parent.grad.lazydata._np + grad._np)
 
-# Step 40 - bind_unary_tensor_methods (not yet solved)
-# TODO: implement
+# Step 40 - bind_unary_tensor_methods
+def bind_unary_tensor_methods():
+    # TODO: map neg/relu/log/exp/sqrt/sigmoid names to callables using function_apply
+    def _make(F):
+        def method(*t, **kwargs):
+            return F.apply(*t, **kwargs)
+        return method
+
+    methods = {
+        'neg' : _make(Neg),
+        'relu' : _make(Relu),
+        'log' : _make(Log),
+        'exp' : _make(Exp),
+        'sqrt' : _make(Sqrt),
+        'sigmoid' : _make(Sigmoid)
+    }
+
+    return methods
 
 # Step 41 - broadcasted (not yet solved)
 # TODO: implement
