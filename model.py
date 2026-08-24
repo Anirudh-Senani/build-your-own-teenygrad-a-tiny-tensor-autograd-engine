@@ -485,15 +485,18 @@ def tensor_randn(shape, seed=None, requires_grad=False):
 def build_topological_order(tensor):
     # TODO: DFS over each node's _ctx.parents, append a node after its parents
     visited = set()
-    order = []
-    if tensor.name not in visited:
-        visited.add(tensor.name)
-        if tensor._ctx is not None:
-            for parent in tensor._ctx:
-                order += build_topological_order(parent)
-        order += [tensor]
+    def dfs(tensor):
+        order = []
+        if tensor.name not in visited:
+            visited.add(tensor.name)
+            if tensor._ctx is not None:
+                for parent in tensor._ctx.parents:
+                    order += dfs(parent)
+            order += [tensor]
 
-    return order
+        return order
+
+    return dfs(tensor)
 
 # Step 39 - tensor_backward (not yet solved)
 # TODO: implement
