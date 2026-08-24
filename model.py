@@ -576,8 +576,50 @@ def bind_binary_tensor_methods():
     Tensor.div = div
     Tensor.__truediv__ = div
 
-# Step 43 - bind_movement_tensor_methods (not yet solved)
-# TODO: implement
+# Step 43 - bind_movement_tensor_methods
+def bind_movement_tensor_methods():
+    def _get_lazydata(t):
+        for attr in ('lazydata', 'data', '_lazydata'):
+            if hasattr(t, attr):
+                val = getattr(t, attr)
+                return val if isinstance(val, LazyBuffer) else LazyBuffer(val)
+        raise AttributeError("no lazybuffer found")
+
+    def _wrap(out, requires_grad, ctx):
+        t = Tensor.__new__(Tensor)
+        t.lazydata = out
+        t.requires_grad = requires_grad
+        t.grad = None
+        t._ctx = ctx if requires_grad else None
+        return t
+
+    Expand = type('Expand', (Function,), {'forward': expand_function_forward, 'backward': expand_function_backward})
+    permute_fwd, permute_bwd = permute_function_forward_backward()
+    Permute = type('Permute', (Function,), {'forward': permute_fwd, 'backward': permute_bwd})
+
+    def _apply(Cls, x, **kwargs):
+        ctx = object.__new__(Cls)
+        ctx.needs_input_grad = [x.requires_grad]
+        ctx.requires_grad = x.requires_grad
+        ctx.parents = (x,)
+        buf = _get_lazydata(x)
+        out = ctx.forward(buf, **kwargs)
+        return _wrap(out, ctx.requires_grad, ctx)
+
+    def reshape(self, shape):
+        return _apply(Reshape, self, shape=tuple(shape))
+
+    def expand(self, shape):
+        return _apply(Expand, self, shape=tuple(shape))
+
+    def permute(self, order):
+        return _apply(Permute, self, order=tuple(order))
+
+    return {
+        'reshape': reshape,
+        'expand': expand,
+        'permute': permute
+    }
 
 # Step 44 - bind_reduce_tensor_methods (not yet solved)
 # TODO: implement
