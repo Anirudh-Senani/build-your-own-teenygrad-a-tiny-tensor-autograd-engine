@@ -535,7 +535,18 @@ def bind_unary_tensor_methods():
         'sigmoid' : _make(Sigmoid)
     }
 
+    Tensor.neg = methods['neg']
+    Tensor.__neg__ = methods['neg']
+
+    Tensor.relu = methods['relu']
+    Tensor.log = methods['log']
+    Tensor.log = methods['exp']
+    Tensor.sqrt = methods['sqrt']
+    Tensor.sigmoid = methods['sigmoid']
+
     return methods
+
+bind_unary_tensor_methods()
 
 # Step 41 - broadcasted
 def broadcasted(x, y):
@@ -842,8 +853,28 @@ def accuracy(logits, labels):
 
     return float((y_hat == labels).mean())
 
-# Step 57 - train_mlp (not yet solved)
-# TODO: implement
+# Step 57 - train_mlp
+def train_mlp(X, y, epochs=50, learning_rate=0.1, hidden=16, seed=0):
+    # TODO: build an MLP for X, y and run gradient descent, returning (model, loss_history)
+    n, in_features = np.asarray(X, dtype=np.float32).shape
+    y = np.asarray(y, dtype=np.int64)
+    num_classes = int(y.max()) + 1
+
+    model = MLP(in_features, hidden, num_classes, seed=seed)
+    losses = []
+    optim = model.parameters()
+
+    for _ in range(epochs):
+        logits = model(X)
+
+        loss = sparse_categorical_cross_entropy(logits, y)
+        losses.append(float(loss.numpy()))
+
+        zero_grad(optim)
+        tensor_backward(loss)
+        sgd_step(optim, learning_rate)
+
+    return model, losses
 
 # Step 58 - evaluate_mlp (not yet solved)
 # TODO: implement
