@@ -487,8 +487,8 @@ def build_topological_order(tensor):
     visited = set()
     def dfs(tensor):
         order = []
-        if tensor.name not in visited:
-            visited.add(tensor.name)
+        if tensor not in visited:
+            visited.add(tensor)
             if tensor._ctx is not None:
                 for parent in tensor._ctx.parents:
                     order += dfs(parent)
@@ -498,8 +498,23 @@ def build_topological_order(tensor):
 
     return dfs(tensor)
 
-# Step 39 - tensor_backward (not yet solved)
-# TODO: implement
+# Step 39 - tensor_backward
+def tensor_backward(tensor):
+    # TODO: seed root grad with ones, run each backward in reverse topo order
+    tensor.grad = Tensor(const(1.0, tensor.shape))
+    grad_output = tensor.grad
+
+    for node in reversed(build_topological_order(tensor)):
+        if node._ctx is None:
+            continue
+        grads = node._ctx.backward(grad_output)
+        for parent, grad in zip(node._ctx.parents, grads):
+            if grad is None or not parent.requires_grad:
+                continue
+            if parent.grad is None:
+                parent.grad = Tensor(grad)
+            else:
+                parent.grad = tensor_from_data(parent.grad._np + grad._np)
 
 # Step 40 - bind_unary_tensor_methods (not yet solved)
 # TODO: implement
