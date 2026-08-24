@@ -664,8 +664,28 @@ def tensor_mean(x, axis=None, keepdim=False):
     # TODO: sum x over axis then divide by the number of reduced elements
     return tensor_from_data(_to_np(x).mean(axis=axis, keepdims=keepdim))
 
-# Step 46 - tensor_transpose (not yet solved)
-# TODO: implement
+# Step 46 - tensor_transpose
+def tensor_transpose(x, ax1=-2, ax2=-1):
+    # TODO: swap axes ax1 and ax2 of tensor x using a permutation
+    def _to_np(t):
+        for attr in ('lazydata', 'data', '_lazydata', 'buffer', '_data'):
+            if hasattr(t, attr):
+                val = getattr(t, attr)
+                return val._np if isinstance(val._np, LazyBuffer) else np.asarray(val._np)
+        if hasattr(t, '_np'):
+            return val._np
+        raise AttributeError
+
+    arr = _to_np(x)
+    n = len(arr.shape)
+    a1 = ax1 % n
+    a2 = ax2 % n
+
+    order = list(range(n))
+    order[a1], order[a2] = order[a2], order[a1]
+    order = tuple(order)
+
+    return x.permute(order)
 
 # Step 47 - tensor_matmul_2d (not yet solved)
 # TODO: implement
