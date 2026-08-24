@@ -721,16 +721,18 @@ def tensor_softmax(x, axis=-1):
 # Step 49 - tensor_log_softmax
 def tensor_log_softmax(x, axis=-1):
     # TODO: compute the log of the softmax of x along axis, numerically stable
-    def _to_np(self):
-        for attr in ('lazydata', 'data', 'buffer'):
-            if hasattr(self, attr):
-                val = getattr(self, attr)
-                return val._np if isinstance(val._np, np.ndarray) else np.array(val, dtype=np.float64)
-        if hasattr(self, '_np'):
-            return self._np
-        raise AttributeError("no numpy array found")
+    if hasattr(x, '_np'):
+        raw = x._np
+    elif hasattr(x, 'lazydata'):
+        raw = x.lazydata
+        raw = raw._np if hasattr(raw, '_np') else raw
+    elif hasattr(x, 'data'):
+        raw = x.data
+        raw = raw._np if hasattr(raw, '_np') else raw
+    else:
+        raw = x
 
-    arr = np.array(_to_np(x), dtype=np.float64)
+    arr = np.array(raw, dtype=np.float64)
     shifted = arr - arr.max(axis=axis, keepdims=True)
     log_sum_exp = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
 
