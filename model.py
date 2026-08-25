@@ -665,16 +665,20 @@ def bind_reduce_tensor_methods():
     def sum(self, axis=None, keepdim=False):
         arr = _np(self)
         axes = _axes(len(arr.shape), axis)
-        result = arr.sum(axis=axes, keepdims=keepdim)
-        return tensor_from_data(result)
+        # result = arr.sum(axis=axes, keepdims=keepdim)
+        # return tensor_from_data(result)
+        return Sum.apply(self, axis=axes, keepdim=keepdim)
     Tensor.sum = sum
 
     def max(self, axis=None, keepdim=False):
         arr = _np(self)
         axes = _axes(len(arr.shape), axis)
-        result = arr.max(axis=axes, keepdims=keepdim)
-        return tensor_from_data(result)
+        # result = arr.max(axis=axes, keepdims=keepdim)
+        # return tensor_from_data(result)
+        return Max.apply(self, axis=axes, keepdim=keepdim)
     Tensor.max = max
+
+bind_reduce_tensor_methods()
 
 # Step 45 - tensor_mean
 def tensor_mean(x, axis=None, keepdim=False):
