@@ -553,12 +553,13 @@ def broadcasted(x, y):
     # TODO: align two tensors to one common shape so an elementwise op can run
     if x.data._np.shape == y.data._np.shape:
         return x, y
-    
-    bx, by = np.broadcast_arrays(x.data._np, y.data._np)
-    bx = np.array(bx, dtype=np.float32)
-    by = np.array(by, dtype=np.float32)
 
-    return tensor_from_data(bx), tensor_from_data(by)
+    shape = np.broadcast_shapes(x.data._np.shape, y.data._np.shape)
+    bx = x.expand(shape=shape)
+    by = y.expand(shape=shape)
+
+    # return tensor_from_data(bx), tensor_from_data(by)
+    return bx, by
 
 # Step 42 - bind_binary_tensor_methods
 def bind_binary_tensor_methods():
@@ -637,6 +638,8 @@ def bind_movement_tensor_methods():
         'expand': expand,
         'permute': permute
     }
+
+bind_movement_tensor_methods()
 
 # Step 44 - bind_reduce_tensor_methods
 def bind_reduce_tensor_methods():
@@ -729,17 +732,17 @@ def tensor_matmul_2d(a, b):
     m, k = an.shape
     _, n = bn.shape
 
-    a3 = an.reshape((m,k,1))
-    b3 = bn.reshape((1,k,n))
+    a3 = a.reshape(shape=(m,k,1))
+    b3 = b.reshape(shape=(1,k,n))
 
     prod = a3 * b3
     result = prod.sum(axis=1)
 
-    cls = type(a)
-    out = cls.__new__(cls)
-    out.lazydata = LazyBuffer(result)
+    # cls = type(a)
+    # out = cls.__new__(cls)
+    # out.lazydata = LazyBuffer(result)
 
-    return out
+    return result
 
 # Step 48 - tensor_softmax
 def tensor_softmax(x, axis=-1):
