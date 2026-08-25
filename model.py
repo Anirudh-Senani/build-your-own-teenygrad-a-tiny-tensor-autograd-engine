@@ -683,7 +683,19 @@ bind_reduce_tensor_methods()
 # Step 45 - tensor_mean
 def tensor_mean(x, axis=None, keepdim=False):
     # TODO: sum x over axis then divide by the number of reduced elements
-    return tensor_from_data(_to_np(x).mean(axis=axis, keepdims=keepdim))
+    arr = _to_np(x)
+    len_shape = len(arr.shape)
+    n_axis = tuple(range(len_shape))
+    axis = n_axis if axis is None else axis
+    axis = tuple(i%len_shape for i in axis) if isinstance(axis, (tuple, list)) else tuple([axis % len_shape])
+    output_shape = tuple(arr.shape[i] for i in n_axis if i in axis)
+    n_elements = prod(output_shape)
+    if keepdim:
+        output_shape = tuple(arr.shape[i] if i not in axis else 1 for i in n_axis)
+    else:
+        output_shape = tuple(arr.shape[i] for i in n_axis if i not in axis)
+    scale = Tensor(const(1.0/n_elements, output_shape))
+    return x.sum(axis=axis, keepdim=keepdim) * scale
 
 # Step 46 - tensor_transpose
 def tensor_transpose(x, ax1=-2, ax2=-1):
