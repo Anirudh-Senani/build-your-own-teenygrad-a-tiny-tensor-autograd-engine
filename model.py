@@ -507,16 +507,16 @@ def tensor_backward(tensor):
     for node in reversed(build_topological_order(tensor)):
         if node._ctx is None:
             continue
-        grads = node._ctx.backward(grad_output)
+        grads = node._ctx.backward(node.grad)
         if isinstance(grads, LazyBuffer):
             grads = [grads]
         for parent, grad in zip(node._ctx.parents, grads):
             if grad is None or not parent.requires_grad:
                 continue
             if parent.grad is None:
-                parent.grad = Tensor(grad)
+                parent.grad = Tensor(grad, requires_grad=False)
             else:
-                parent.grad = tensor_from_data(parent.grad.lazydata._np + grad._np)
+                parent.grad += Tensor(grad, requires_grad=False)
 
 # Step 40 - bind_unary_tensor_methods
 def bind_unary_tensor_methods():
@@ -620,13 +620,17 @@ def bind_movement_tensor_methods():
         return _wrap(out, ctx.requires_grad, ctx)
 
     def reshape(self, shape):
-        return _apply(Reshape, self, shape=tuple(shape))
+        return Reshape.apply(self, shape=shape)
 
     def expand(self, shape):
-        return _apply(Expand, self, shape=tuple(shape))
+        return Expand.apply(self, shape=tuple(shape))
 
     def permute(self, order):
-        return _apply(Permute, self, order=tuple(order))
+        return Permute.apply(self, order=tuple(order))
+
+    Tensor.reshape = reshape
+    Tensor.expand = expand
+    Tensor.permute = permute
 
     return {
         'reshape': reshape,
