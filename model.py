@@ -540,7 +540,7 @@ def bind_unary_tensor_methods():
 
     Tensor.relu = methods['relu']
     Tensor.log = methods['log']
-    Tensor.log = methods['exp']
+    Tensor.exp = methods['exp']
     Tensor.sqrt = methods['sqrt']
     Tensor.sigmoid = methods['sigmoid']
 
@@ -747,12 +747,14 @@ def tensor_matmul_2d(a, b):
 # Step 48 - tensor_softmax
 def tensor_softmax(x, axis=-1):
     # TODO: turn logits into a probability distribution along the given axis
-    bind_reduce_tensor_methods()
-    arr = x.numpy()
-    shifted_exp = np.exp(arr - arr.max(axis=axis, keepdims=True))
-    result = shifted_exp/shifted_exp.sum(axis=axis, keepdims=True)
+    # arr = x.numpy()
+    # shifted_exp = np.exp(arr - arr.max(axis=axis, keepdims=True))
+    # result = shifted_exp/shifted_exp.sum(axis=axis, keepdims=True)
 
-    return tensor_from_data(result)
+    shifted_exp = (x - x.max(axis=axis, keepdim=True)).exp()
+    result = shifted_exp/shifted_exp.sum(axis=axis, keepdim=True)
+
+    return result
 
 # Step 49 - tensor_log_softmax
 def tensor_log_softmax(x, axis=-1):
