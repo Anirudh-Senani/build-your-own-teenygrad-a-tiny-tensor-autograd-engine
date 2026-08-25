@@ -759,29 +759,40 @@ def tensor_softmax(x, axis=-1):
 # Step 49 - tensor_log_softmax
 def tensor_log_softmax(x, axis=-1):
     # TODO: compute the log of the softmax of x along axis, numerically stable
-    if hasattr(x, '_np'):
-        raw = x._np
-    elif hasattr(x, 'lazydata'):
-        raw = x.lazydata
-        raw = raw._np if hasattr(raw, '_np') else raw
-    elif hasattr(x, 'data'):
-        raw = x.data
-        raw = raw._np if hasattr(raw, '_np') else raw
-    else:
-        raw = x
+    def _to_np(x):
+        if hasattr(x, '_np'):
+            raw = x._np
+        elif hasattr(x, 'lazydata'):
+            raw = x.lazydata
+            raw = raw._np if hasattr(raw, '_np') else raw
+        elif hasattr(x, 'data'):
+            raw = x.data
+            raw = raw._np if hasattr(raw, '_np') else raw
+        else:
+            raw = x
+        return raw
+    Tensor.numpy = _to_np
 
-    arr = np.array(raw, dtype=np.float64)
-    shifted = arr - arr.max(axis=axis, keepdims=True)
-    log_sum_exp = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
+    # arr = np.array(raw, dtype=np.float64)
+    # shifted = arr - arr.max(axis=axis, keepdims=True)
+    # log_sum_exp = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
 
-    class Result:
-        def __init__(self, array):
-            self._array = array
+    # arr = np.array(raw, dtype=np.float64)
+    x.data._np = np.array(x.numpy(), dtype=np.float64)
+    shifted = x - x.max(axis=axis, keepdim=True)
+    log_sum_exp = shifted.exp().sum(axis=axis, keepdim=True).log()
+    result = shifted - log_sum_exp
 
-        def numpy(self):
-            return self._array
+    # class Result:
+    #     def __init__(self, array):
+    #         self._array = array
 
-    return Result(shifted - log_sum_exp)
+    #     def numpy(self):
+    #         return self._array
+
+    # return Result(shifted - log_sum_exp)
+
+    return result
 
 # Step 50 - sparse_categorical_cross_entropy
 def sparse_categorical_cross_entropy(logits, labels):
