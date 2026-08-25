@@ -343,11 +343,11 @@ def backward(self, grad_output):
 
 # Step 28 - max_function_forward
 class Max(Function):
-    def forward(self, x, axis):
+    def forward(self, x, axis, keepdim=True):
         # TODO: reduce x with the MAX reduce op along axis and cache for backward
         self.x = x
         self.axis = axis
-        self.ret = x.r(ReduceOps.MAX, axis)
+        self.ret = x.r(ReduceOps.MAX, axis, keepdim=keepdim)
         return self.ret
 
 # Step 29 - max_function_backward
