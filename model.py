@@ -401,7 +401,10 @@ def expand_function_forward(ctx, x, shape):
 # Step 32 - expand_function_backward
 def expand_function_backward(ctx, grad_output):
     # TODO: Sum grad_output over the broadcast axes back to ctx.input_shape...
-    axis = tuple(i for i in range(len(ctx.input_shape)) if ctx.input_shape[i]==1 and grad_output.shape[i]!=1)
+    in_shape = [1]*(len(grad_output._np.shape) -
+                    len(ctx.input_shape)) + list(ctx.input_shape)
+    axis = tuple(i for i in range(len(in_shape))
+                 if in_shape[i] == 1 and grad_output.shape[i] != 1)
     return grad_output.r(ReduceOps.SUM, axis)
 
 # Step 33 - permute_function_forward_backward
