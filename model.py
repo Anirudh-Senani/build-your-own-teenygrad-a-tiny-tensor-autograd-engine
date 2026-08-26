@@ -341,6 +341,8 @@ def backward(self, grad_output):
     # TODO: broadcast the summed gradient back to the original input shape
     return grad_output.expand(self.input_shape)
 
+Sum.backward = backward
+
 # Step 28 - max_function_forward
 class Max(Function):
     def forward(self, x, axis, keepdim=True):
