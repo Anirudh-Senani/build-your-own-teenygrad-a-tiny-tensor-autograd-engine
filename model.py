@@ -339,7 +339,12 @@ class Sum(Function):
 # Step 27 - sum_function_backward
 def backward(self, grad_output):
     # TODO: broadcast the summed gradient back to the original input shape
-    return grad_output.expand(self.input_shape)
+    if hasattr(self, 'axis'):
+        shape = tuple(1 if i in self.axis else i for i in self.input_shape)
+        grad = grad_output.reshape(shape)
+    else:
+        grad = grad_output
+    return grad.expand(self.input_shape)
 
 Sum.backward = backward
 
@@ -509,7 +514,7 @@ def tensor_backward(tensor):
     for node in reversed(build_topological_order(tensor)):
         if node._ctx is None:
             continue
-        grads = node._ctx.backward(node.grad)
+        grads = node._ctx.backward(node.grad.data)
         if isinstance(grads, LazyBuffer):
             grads = [grads]
         for parent, grad in zip(node._ctx.parents, grads):
@@ -780,7 +785,7 @@ def tensor_log_softmax(x, axis=-1):
     # log_sum_exp = np.log(np.exp(shifted).sum(axis=axis, keepdims=True))
 
     # arr = np.array(raw, dtype=np.float64)
-    x.data._np = np.array(x.numpy(), dtype=np.float64)
+    # x.data._np = np.array(x.numpy(), dtype=np.float64)
     shifted = x - x.max(axis=axis, keepdim=True)
     log_sum_exp = shifted.exp().sum(axis=axis, keepdim=True).log()
     result = shifted - log_sum_exp
