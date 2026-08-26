@@ -813,8 +813,8 @@ class Linear:
         self.bias = Tensor(b, requires_grad=True)
 
     def __call__(self, x):
-        y = tensor_matmul_2d(x, self.weight).data._np + np.asarray(self.bias.data._np, dtype=np.float32)
-        return Tensor(y, requires_grad=True)
+        y = tensor_matmul_2d(x, self.weight) + self.bias
+        return y
 
     def parameters(self):
         return [self.weight, self.bias]
