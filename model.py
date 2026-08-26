@@ -771,21 +771,23 @@ def tensor_softmax(x, axis=-1):
     return result
 
 # Step 49 - tensor_log_softmax
-def tensor_log_softmax(x, axis=-1):
-    # TODO: compute the log of the softmax of x along axis, numerically stable
-    def _to_np(x):
-        if hasattr(x, '_np'):
-            raw = x._np
-        elif hasattr(x, 'lazydata'):
-            raw = x.lazydata
+def _to_np(self):
+        if hasattr(self, '_np'):
+            raw = self._np
+        elif hasattr(self, 'lazydata'):
+            raw = self.lazydata
             raw = raw._np if hasattr(raw, '_np') else raw
-        elif hasattr(x, 'data'):
-            raw = x.data
+        elif hasattr(self, 'data'):
+            raw = self.data
             raw = raw._np if hasattr(raw, '_np') else raw
         else:
-            raw = x
+            raw = self
         return raw
-    Tensor.numpy = _to_np
+Tensor.numpy = _to_np
+
+def tensor_log_softmax(x, axis=-1):
+    # TODO: compute the log of the softmax of x along axis, numerically stable
+    
 
     # arr = np.array(raw, dtype=np.float64)
     # shifted = arr - arr.max(axis=axis, keepdims=True)
@@ -811,11 +813,19 @@ def tensor_log_softmax(x, axis=-1):
 # Step 50 - sparse_categorical_cross_entropy
 def sparse_categorical_cross_entropy(logits, labels):
     # TODO: mean negative log-probability of the correct class for each sample
-    logprobs = tensor_log_softmax(logits).numpy().astype(np.float64)
+    if not isinstance(logits, Tensor):
+        logits = tensor_from_data(logits)
+    logprobs = tensor_log_softmax(logits)
     labels = np.asarray(labels).astype(int).reshape(-1)
 
-    loss = (-logprobs[np.arange(labels.shape[0]), labels]).mean()
-    return tensor_from_data(float(loss))
+    one_hot = np.zeros(logprobs.data._np.shape)
+    one_hot[np.arange(labels.shape[0]), labels] = -1.0
+    one_hot = tensor_from_data(one_hot)
+
+    num_samples = tensor_from_data(1.0/labels.shape[0])
+
+    loss = (logprobs * one_hot).sum(axis=None, keepdim=False) * num_samples
+    return loss
 
 # Step 51 - Linear
 class Linear:
