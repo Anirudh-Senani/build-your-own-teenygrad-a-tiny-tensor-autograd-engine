@@ -333,6 +333,7 @@ class Sum(Function):
         # TODO: Reduce x with ReduceOps.SUM over axis (keepdims) and cache shape/axis.
         self.input_shape = x._np.shape
         self.axis = axis
+        self.keepdim = keepdim
 
         return x.r(ReduceOps.SUM, axis, keepdim=keepdim)
 
