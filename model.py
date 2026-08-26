@@ -339,11 +339,17 @@ class Sum(Function):
 # Step 27 - sum_function_backward
 def backward(self, grad_output):
     # TODO: broadcast the summed gradient back to the original input shape
-    if hasattr(self, 'axis'):
-        shape = tuple(1 if i in self.axis else i for i in self.input_shape)
-        grad = grad_output.reshape(shape)
-    else:
+    if not hasattr(self, 'keepdim') or self.keepdim:
+        # keepdim=True: shapes already match
         grad = grad_output
+    else:
+        # keepdim=False: reinsert squeezed dimensions as size-1
+        shape = list(grad_output.shape)
+        axes = (self.axis,) if isinstance(self.axis, int) else self.axis
+        for axis in sorted(axes):
+            shape.insert(axis, 1)
+        grad = grad_output.reshape(tuple(shape))
+    
     return grad.expand(self.input_shape)
 
 Sum.backward = backward
