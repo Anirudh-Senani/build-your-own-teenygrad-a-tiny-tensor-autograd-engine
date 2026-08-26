@@ -827,9 +827,6 @@ class MLP:
         self.ff1 = Linear(in_features, hidden, seed=seed)
         self.ff2 = Linear(hidden, out_features, seed=seed)
 
-        methods = bind_unary_tensor_methods()
-        Tensor.relu = methods['relu']
-
     def __call__(self, x):
         # TODO: apply first layer, relu, then second layer
         if not isinstance(x, Tensor):
